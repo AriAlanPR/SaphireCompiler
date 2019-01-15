@@ -1,0 +1,348 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+
+namespace LyARev
+{
+    public partial class Form1 : Form
+    {
+        public Form1()
+        {
+            InitializeComponent();
+        }
+        //variable global del tipo de la clase generada para hacer las operaciones con conexion al archivo de excel obtenido
+        BDOLEDB BD;
+        string codigoprocesado = ""; //variable que contiene los tokens asignados a cada linea de codigo de manera concatenada
+        List<string> IDE = new List<string>(); //lista en la que se guardan los identificadores, tambien es usada para evitar
+                                                //que se repitan
+        private void tstrcargar_Click(object sender, EventArgs e)
+        {
+            //se establece una variable para obtener la ruta de forma vacia
+            string ruta="";
+            try
+            {
+                //se abre un archivo de dialogo para buscar el documento de excel al que se quiere conectar
+                OpenFileDialog open = new OpenFileDialog();
+                //se filtran los archivos a la extension .xlsx
+                open.Filter = "archivo Excel(*.xlsx)|*.xlsx";
+                //se establece el titulo de dialogo con el string asignado
+                open.Title = "Documentos Excel";
+                if (open.ShowDialog() == DialogResult.OK)
+                {
+                    //si se obtuvo una ruta para el archivo de excel se guardara la ruta en la variable generada anteriormente
+                    ruta = open.FileName;
+                }
+                //se libera de memoria la variable del archivo de dialogo
+                open.Dispose();
+                //luego de obtener la ruta podemos iniciar la base de datos
+                BD = new BDOLEDB(ruta);
+                //se da a entender al usuario que la conexion se logro cambiando el texto de un label que indica el estado de conexion
+                tslblconexion.Text= "Enlazado :D";
+                
+                //dgvmatriztransicion.DataSource = BD.DT;
+            }
+            catch (NullReferenceException)
+            {
+                //si el archivo de excel es nulo se manda mensaje al usuario
+                MessageBox.Show("El archivo Excel seleccionado es nulo :c");
+            }
+            catch (Exception ex)
+            {
+                //si ocurre una excepcion de cualquier tipo por alguna razon desconocida se manda mensaje al usuario con los
+                //detalles del error ocurrido
+                MessageBox.Show(":c No se pudo porque: " + ex.Message);
+                //se da a entender al usuario que hubo un error cambiando el texto del label que indica el estado de conexion
+                tslblconexion.Text = "Posible error de conexion";
+            }
+        }
+
+        private void tstrleer_Click(object sender, EventArgs e)
+        {   //se encierra dentro de un try-catch para capturar posibles errores
+            try
+            {
+                //se pone en blanco la variable codigoprocesado por si se usa una segunda vez
+                codigoprocesado = "";
+                //se vacia el progressbar por si ya fue cargado antes
+                tsprgb1.Value = tsprgb1.Minimum;
+                //se limpian los campos ingresados del datagridview antes de hacer de nuevo la lectura
+                dgvmatriztransicion.Rows.Clear();
+                dgverrores.Rows.Clear();
+                dgvcade.Rows.Clear();
+                dgvid.Rows.Clear();
+                //si no hay texto ingresado manda mensaje al usuario
+                if (string.IsNullOrWhiteSpace(txtleer.Text))
+                    MensAdv("No se permite cuadro de texto vacio");
+                else //inicia el else
+                {
+                    //se hace un arrego de strings que representa cada linea del texto ingresado
+                    string[] elcodigo = txtleer.Text.Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);                   
+                    tsprgb1.Maximum = elcodigo.Length; //se establece el numero de bloques para el progressbar
+                    int numidentificador = 1, numcadena=1; //se genera una variable que contabiliza los identificadores obtenidos
+                    for (int i = 0; i < elcodigo.Length; i++)
+                    {
+                        //se incrementa el progressbar en 1 bloque cada vez que se entra a leer una nueva linea de codigo
+                        tsprgb1.Increment(1);
+                        //se asigna a la variable codigo la linea que se esta leyendo de codigo
+                        string codigo = elcodigo[i];
+                        //se quitan los espacios en blanco que hay al inicio y/o final de la cadena
+                        codigo = codigo.Trim();
+                        //se convierte la linea de codigo en un arreglo de cada palabra generada
+                        string[] palabraslinea = codigo.Split(' ');
+                        for (int j = 0; j < palabraslinea.Length; j++)
+                        {
+                            //se convierte el texto en un arreglo de caracteres de cada letra del texto
+                            char[] caracter = palabraslinea[j].ToCharArray();
+                            //se usa un contador(x) y el estado inicial se establece en 0
+                            int x = 0;
+                            //la variable conc ira concatenando cada letra recibida al escribir una palabra
+                            //token guardara temporalmente el token aceptado para agregarlo a la lista y concatenarlo en una 
+                            //variable que contiene el conjunto de tokens
+                            string estado = "0", conc = "", token;
+                            //se genera una variable booleana auxiliar para saber si ocurrio o no un error
+                            bool error = false;
+                            //el ciclo siguiente hara el recorrido en la matriz validando cada caracter ingresado para saber
+                            //si es valido y, en caso de serlo identificara tambien que tipo de token se le asigno                    
+                            while (x < caracter.Length) //&& error == false)
+                            {   //mientras que el iterador sea menor que la cadena y no ocurra un error
+                                    //en un string se guardara la celda resultante del recorrido de la matriz
+                                    string resultado;
+                                    if (error == false)
+                                    {
+                                        //se verifica que no haya minusculas ya que el manejador de excel no diferencia mayusculas y minusculas en
+                                        //sus consultas y nuestro lenguaje esta hecho con la idea de que las palabras reservadas sean unicamente
+                                        //mayusculas
+                                        if (VerificarMinuscula(caracter[x].ToString())) //si el caracter es minuscula se envia a verificar si es identificador
+                                            resultado = BD.Transicion(caracter[x].ToString() + "1", estado);
+                                        else
+                                        {   //si el caracter es de tipo caracter especial
+                                            if (VerificarCarEs(caracter[x].ToString()))
+                                            {
+                                                //se guarda primero dentro de la variable resultado el nombre de columna del caracter
+                                                resultado = BD.columnaCarEs(caracter[x].ToString());
+                                                /*luego se hace el recorrido con el nombre de columna guardado en la variable resultado
+                                                y la variable resultado se reemplaza por el resultado del recorrido en la matriz de transicion*/
+                                                resultado = BD.Transicion(resultado, estado);
+                                            }
+                                            else
+                                            {   /*si el caracter es un digito o una letra mayuscula no se necesita algun tipo de columna especial asi que:
+                                     * se captura en una variable string el resultado que arrojo el caracter ingresado,
+                                    dicho resultado sera la palabra reservada aceptada, el estado a donde se movera el apuntador, o un error */
+                                                resultado = BD.Transicion(caracter[x].ToString(), estado);
+                                            }
+                                        }/*si se obtuvo un estado al cual mover el apuntador(cabezal de lectura), el estado debe ser un digito
+                                         para poder mover el apuntador*/
+                                        if (VerificarDigito(resultado))
+                                        {
+                                            estado = resultado; //se apunta al resultado obtenido de la transicion
+                                            conc += caracter[x]; //se concatena el caracter en un string para formar la palabra ingresada
+                                        }
+                                        else
+                                        {
+                                            //se entrara aqui en caso de que lo recibido haya sido un error, no se entrada a este bloque
+                                            //de codigo si es una palabra reservada aceptada ya que al aceptarla sera en fin de cadena, y en el
+                                            //recorrido al llegar a fin de cadena, se termina el ciclo                                    
+                                            error = true;
+                                            conc += caracter[x];
+                                        }
+                                    }
+                                    else
+                                    {   // si ocurrio un error durante la lectura de la palabra unicamente se seguira concatenando hasta
+                                        //formar dicha palabra, se reemplazara por Error en el cuadro de texto y se agregara a la lista
+                                        //al terminar la lectura, despues se limpiara el texto de la variable conc
+                                        conc += caracter[x];
+                                    }                                                               
+                                //se incrementa la variable del iterador
+                                x++;
+                            }//aqui termina el ciclo while
+                            //la palabra se debe de agregar al final, ya que la rutina del while termina antes 
+                            //de que se agregue a la lista la palabra
+                            token = BD.Transicion("FDC", estado);
+                            if (error || token == "error")
+                            {
+                                //si ocurrio un error al final se realiza la misma rutina de dentro del ciclo
+                                //txtleer.Text= txtleer.Text.Replace(conc, "Error");
+                                dgverrores.Rows.Add(conc, i + 1, j+1);
+                                codigoprocesado += " error ";
+                            }
+                            else
+                            {
+                                //Se obtiene el token que se le asigna al texto leido y se agrega al datagridview el texto junto con su token
+                                //dependiendo de si es IDENTIFICADOR o PALABRA RESERVADA
+                                if (token == "IDE")
+                                {
+                                    if (IDE.Contains(conc) == false)
+                                    {
+                                        dgvid.Rows.Add(numidentificador, token, conc);
+                                        IDE.Add(conc);
+                                        token += numidentificador;
+                                        numidentificador++;
+                                    }
+                                    else
+                                        token += (IDE.IndexOf(conc) + 1);
+                                }
+                                else
+                                    if (token == "CADE")
+                                    {
+                                        dgvcade.Rows.Add(numcadena, conc.Replace("_", " "));
+                                        token += numcadena;
+                                        numcadena++;
+                                    }
+                                    else
+                                        dgvmatriztransicion.Rows.Add(conc, token);
+                                codigoprocesado += " " + token + " "; //se concatena lo obtenido al conjunto de tokens previo
+                            }
+                            estado = "0"; //se reinicia el cabezal de lectura
+                            conc = ""; //se limpia la variable con la palabra a concatenar                            
+                        }//aqui termina el for usado para las palabras de la linea de codigo
+                        //antes de iniciar una nueva linea de codigo se genera un salto de linea en el conjunto de tokens
+                        codigoprocesado += "\r\n";
+                    }//aqui termina el for de cada linea de codigo
+                    tsprgb1.Increment(1); //se le incrementa un bloque al progressbar
+                    //se envia un mensaje con el conjunto de tokens generados
+                    Mensaje(codigoprocesado);
+
+                }//aqui termina el else(caso de que no haya cuadro vacio)   
+
+                //se contabiliza cada cosa
+                lblpa.Text = dgvmatriztransicion.Rows.Count.ToString();
+                lblerr.Text = dgverrores.Rows.Count.ToString();
+                lblide.Text = dgvid.Rows.Count.ToString();
+                lblcadenas.Text = dgvcade.Rows.Count.ToString();
+            }//aqui termina el try
+            catch (Exception x)
+            {
+                //al recibir un error se envia un mensaje al usuario con los detalles del error
+                MensError(x.Message);
+                //si la conexion de datos no es nula, dado que pudo ocurrir dicho error antes de que la conexion se cerrara se 
+                //forzara el cierre de la conexion mediante el metodo cerrar de la clase generada para la conexion de datos.
+                if (BD != null)
+                    BD.Cerrar();
+            }
+        }
+        //metodos para enviar mensaje al usuario
+        public void Mensaje(string str)
+        {
+            MessageBox.Show(str);
+        }
+
+        public void MensError(string str)
+        {
+            MessageBox.Show(str, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+
+        public void MensAdv(string str)
+        {
+            MessageBox.Show(str, "Advertencia", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+
+        //rutinas para identificar el tipo de caracter unicamente no existe una rutina que identifica mayusculas
+        //metodo para verificar digitos
+        public static bool VerificarDigito(string car)
+        {
+            int ascii = Encoding.ASCII.GetBytes(car)[0];
+            if ((ascii >= 48 && ascii <= 57))
+                return true;
+            else
+                return false;
+        }
+        //metodo para verificar que el caracter recibido sea una minuscula
+        //este metodo se requiere ya que al hacer una consulta en excel no diferencia mayusculas y minusculas
+        public static bool VerificarMinuscula(string car)
+        {
+            //lo hace obteniendo el primer caracter del string recibido, el string enviado debe ser unicamente una letra
+            int ascii = Encoding.ASCII.GetBytes(car)[0];
+            if ((ascii >= 97 && ascii <= 122))
+                return true;
+            else
+                return false;
+        }       
+        //metodo que identifica que lo recibido sea caracter especial
+        public static bool VerificarCarEs(string car)
+        {
+            int ascii = Encoding.ASCII.GetBytes(car)[0];
+            if ((ascii >= 33 && ascii <= 47) || (ascii >= 58 && ascii <= 64) || (ascii >= 91 && ascii <= 96) || (ascii >= 123 && ascii <= 126))
+                return true;
+            else
+                return false;
+        }
+
+        //al presionar el boton cerrar que se termine la aplicacion
+        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            Application.Exit();
+        }
+        //codigo que se ejecuta al producirse el evento load
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            //se impide al usuario maximizar el formulario
+            this.MaximizeBox = false;
+            //se hace un focus al cuadro de texto
+            txtleer.Focus();
+            
+        }
+
+        private void dgverrores_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+
+        }
+
+        private void txtleer_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void txtleer_MouseClick(object sender, MouseEventArgs e)
+        {
+           
+        }
+
+        private void txtleer_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void tsbtnguardar_Click(object sender, EventArgs e)
+        {
+            //se abre un savefiledialog para indicar en donde se guardara el documento
+            SaveFileDialog fichero = new SaveFileDialog();
+            //se define la extension del documento como Txt(bloc de notas)
+            fichero.Filter = "Bloc de notas(*.txt)|*.txt";
+            fichero.Title = "Nombre del archivo";
+            if (fichero.ShowDialog() == DialogResult.OK)
+            {
+                //si se selecciono una ruta correcta se genera el txt
+                GenerarTxt(codigoprocesado, fichero.FileName);
+            }
+        }                     
+
+        //Metodo que genera un archivo txt en la ruta inidicada(direccion)
+        public void GenerarTxt(string texto, string direccion)
+        {
+            try
+            {
+                //se genera un streamwriter
+                System.IO.StreamWriter file = new System.IO.StreamWriter(direccion, true);
+                file.WriteLine(texto); //se escribe el texto enviado al metodo
+                //se cierra la conexion del streamwriter
+                file.Close();
+                //se envia mensaje de confirmacion de guardado al usuario
+                Mensaje("Guardado correctamente en:\n" + direccion);
+            }//se envia mensaje al usuario en caso de ocurrir un error
+            catch (Exception x)
+            {
+                MensError(x.Message);
+            }
+        }
+
+        private void statusStrip1_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
+        {
+
+        }
+    }
+}

@@ -1,0 +1,212 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Data;
+using System.Data.OleDb;
+using System.Windows.Forms;
+
+namespace LyARev
+{
+    public class BDOLEDB
+    {      
+
+        //constructores de la clase BDOLEDB
+        public BDOLEDB(string ruta)
+        {//cambiado Jet por ACE, 4 por 12, 8 por 15.
+            cc = @"Provider=Microsoft.ACE.OLEDB.12.0; Data Source=" + ruta + ";Extended Properties='Excel 12.0 Xml;HDR=Yes'";                
+                this.Con = new OleDbConnection(cc);
+                con.Close();                         
+        }
+
+        public BDOLEDB(string ruta, string hoja)
+        {
+            //esto es con excel
+            NombreHoja = hoja;
+            cc = @"Provider=Microsoft.ACE.OLEDB.12.0; Data Source=" + ruta + ";Extended Properties='Excel 12.0 Xml;HDR=Yes'";
+            Consulta = "select [0] from [" + hoja + "$]"; // "Select FDC From [Hoja1$] where Estados= 1";//
+            this.Con = new OleDbConnection(cc);
+            Con.Open();
+            da = new OleDbDataAdapter(Consulta, con);
+            dt = new DataTable();
+            da.Fill(dt);
+            con.Close();             
+        }
+
+        //cadena de conexion
+        private string cc;
+
+        public string CadenaConexion
+        {
+            get { return cc; }
+            set { cc = value; }
+        }
+
+        //nombre de la hoja de excel a consultar
+        private string nomhoja="Hoja1";
+
+        public string NombreHoja
+        {
+            get { return nomhoja; }
+            set { nomhoja = value; }
+        }
+
+        //consulta a realizar
+        private string consulta;
+
+        public string Consulta
+        {
+            get { return consulta; }
+            set { consulta = value; }
+        }
+        
+        //variables y propiedades para conexion a excel(en este caso) mediante OLEDB
+        private OleDbConnection con=null;
+
+        public OleDbConnection Con
+        {
+            get { return con; }
+            set { con = value; }
+        }
+
+        private OleDbCommand com;
+
+        public OleDbCommand Com
+        {
+            get { return com; }
+            set { com = value; }
+        }
+
+        private OleDbDataAdapter da;
+
+        public OleDbDataAdapter Da
+        {
+            get { return da; }
+            set { da = value; }
+        }
+
+        private OleDbDataReader dr;
+
+        public OleDbDataReader DataReader
+        {
+            get { return dr; }
+            set { dr = value; }
+        }
+
+        //dataset y datatable sirven para guardar en ellos los datos obtenidos de una cosulta
+        private DataSet ds;
+
+        public DataSet DS
+        {
+            get { return ds; }
+            set { ds = value; }
+        }
+
+        private DataTable dt;
+        public DataTable DT
+        {
+            get { return dt; }
+            set { dt = value; }
+        }
+        
+        //metodos de ejecucion de querys:
+
+        //con resultados
+        public void QueryconResultado(string query)
+        {
+            con.Open();
+            da = new OleDbDataAdapter(query, con);
+            //constructor = new SqlCommandBuilder(adaptador);
+            ds = new DataSet();
+            da.Fill(ds);            
+            con.Close();
+        }
+        //sin resultados
+        public int QuerysinResultado(string query)
+        {
+            int i;
+            con.Open();
+            com = new OleDbCommand(query, con);
+            i= com.ExecuteNonQuery();
+            con.Close();
+            return i;
+        }
+
+        //metodos para abrir y cerrar la conexion por el usuario
+        public void Abrir()
+        {
+            con.Open();
+        }
+
+        public void Cerrar()
+        {
+                con.Close();            
+        }
+        
+        //metodos para hacer recorrido e identificar la palabra reservada
+        
+        //recorre e identifica el tipo de transicion de lo recibido o su estado de aceptacion/error
+        public string Transicion(string caracter, string estadoactual)
+        {
+            //se genera la consulta del nombre de columna como el caracter recibido en el estado recibido
+            Consulta = "Select [" + caracter + "] From [Idea$] where Estados=" + estadoactual;
+            Con.Open(); //se abre la conexion de datos
+            Com = new OleDbCommand(Consulta, con); //se prepara la cosulta
+            DataReader = Com.ExecuteReader(); //se ejecuta la consulta
+            DataReader.Read(); //se leen los resultados
+            string pr; //se genera una variable auxiliar para la palabra reservada
+                //si se llego a un estado de aceptacion
+                if (DataReader[0].ToString() == "ACEPTA")
+                {   //se genera una consulta al token aceptado
+                    Consulta = "Select CAT From [Idea$] where Estados=" + estadoactual;
+                    Com = new OleDbCommand(Consulta, con);
+                    DataReader = Com.ExecuteReader();
+                    DataReader.Read();
+                    pr= DataReader[0].ToString(); //se guarda en la variable auxiliar el resultado del token                               
+                }
+                else
+                    pr = DataReader[0].ToString(); //se guarda en la variable auxiliar el resultado de la consulta
+                                                   //puede ser un error o el estado siguiente de transicion
+                
+            Con.Close(); //se cierra la conexion
+            if (string.IsNullOrEmpty(pr))
+                return "error";
+            else
+                return pr;  //se envia como valor el resultado de la variable
+        }
+        
+        //realiza una mecanica similar a la anterior pero usando el datarow de un datatable en el cual se guarda el resultado
+        //de la consulta
+        public string Fila(string caracter, string estadoactual)
+        {
+            //se genera la consulta del nombre de columna como el caracter recibido en el estado recibido
+            Consulta = "Select * From [Idea$] where Estados=" + estadoactual;
+            Con.Open(); //se abre la conexion de datos            
+            da = new OleDbDataAdapter(Consulta, con);
+            DataTable tabla = new DataTable();
+            da.Fill(tabla);
+            Con.Close(); //se cierra la conexion
+            string w = tabla.Rows[0][caracter].ToString();//se envia como valor el resultado de la variable
+            return w;
+        }
+
+        /*cuando se recibe un caracter especial en algunos casos cambia el nombre de columna,asi que se debe consultar en 
+          la hoja de caracteres el nombre de su columna */
+        public string columnaCarEs(string caracter)
+        {
+            if (caracter == "'")
+                caracter = "Comilla";
+            Consulta = "Select Columna From [Caracteres$] where Caracter='"+caracter+"'";
+            Con.Open(); //se abre la conexion de datos
+            Com = new OleDbCommand(Consulta, con); //se prepara la cosulta
+            DataReader = Com.ExecuteReader(); //se ejecuta la consulta
+            DataReader.Read(); //se leen los resultados
+            string col = DataReader[0].ToString();
+            con.Close();
+            return col;
+        }
+    }      
+       
+}
+

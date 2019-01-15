@@ -1,0 +1,37 @@
+c:\users\arialan\documents\visual studio 2012\Projects\LyARev\LyARev\bin\Debug\LyARev.exe.config
+c:\users\arialan\documents\visual studio 2012\Projects\LyARev\LyARev\bin\Debug\LyARev.exe
+c:\users\arialan\documents\visual studio 2012\Projects\LyARev\LyARev\bin\Debug\LyARev.pdb
+c:\users\arialan\documents\visual studio 2012\Projects\LyARev\LyARev\obj\Debug\LyARev.csprojResolveAssemblyReference.cache
+c:\users\arialan\documents\visual studio 2012\Projects\LyARev\LyARev\obj\Debug\LyARev.Form1.resources
+c:\users\arialan\documents\visual studio 2012\Projects\LyARev\LyARev\obj\Debug\LyARev.Properties.Resources.resources
+c:\users\arialan\documents\visual studio 2012\Projects\LyARev\LyARev\obj\Debug\LyARev.csproj.GenerateResource.Cache
+c:\users\arialan\documents\visual studio 2012\Projects\LyARev\LyARev\obj\Debug\LyARev.exe
+c:\users\arialan\documents\visual studio 2012\Projects\LyARev\LyARev\obj\Debug\LyARev.pdb
+E:\JesusJavierAriAlanJoseAlberto\Codigo analizador lexico\LyARev\LyARev\bin\Debug\LyARev.exe.config
+E:\JesusJavierAriAlanJoseAlberto\Codigo analizador lexico\LyARev\LyARev\obj\Debug\LyARev.exe
+E:\JesusJavierAriAlanJoseAlberto\Codigo analizador lexico\LyARev\LyARev\obj\Debug\LyARev.pdb
+E:\JesusJavierAriAlanJoseAlberto\Codigo analizador lexico\LyARev\LyARev\bin\Debug\LyARev.exe
+E:\JesusJavierAriAlanJoseAlberto\Codigo analizador lexico\LyARev\LyARev\bin\Debug\LyARev.pdb
+E:\JesusJavierAriAlanJoseAlberto\Codigo analizador lexico\LyARev\LyARev\obj\Debug\LyARev.csprojResolveAssemblyReference.cache
+E:\JesusJavierAriAlanJoseAlberto\Codigo analizador lexico\LyARev\LyARev\obj\Debug\LyARev.Form1.resources
+E:\JesusJavierAriAlanJoseAlberto\Codigo analizador lexico\LyARev\LyARev\obj\Debug\LyARev.Properties.Resources.resources
+E:\JesusJavierAriAlanJoseAlberto\Codigo analizador lexico\LyARev\LyARev\obj\Debug\LyARev.csproj.GenerateResource.Cache
+C:\Users\AriAlan\Documents\tareas tec\6°\LyA 2\Codigo analizador lexico\LyARev\LyARev\bin\Debug\LyARev.exe.config
+C:\Users\AriAlan\Documents\tareas tec\6°\LyA 2\Codigo analizador lexico\LyARev\LyARev\obj\Debug\LyARev.exe
+C:\Users\AriAlan\Documents\tareas tec\6°\LyA 2\Codigo analizador lexico\LyARev\LyARev\obj\Debug\LyARev.pdb
+C:\Users\AriAlan\Documents\tareas tec\6°\LyA 2\Codigo analizador lexico\LyARev\LyARev\bin\Debug\LyARev.exe
+C:\Users\AriAlan\Documents\tareas tec\6°\LyA 2\Codigo analizador lexico\LyARev\LyARev\bin\Debug\LyARev.pdb
+C:\Users\AriAlan\Documents\tareas tec\6°\LyA 2\Codigo analizador lexico\LyARev\LyARev\obj\Debug\LyARev.csprojResolveAssemblyReference.cache
+C:\Users\AriAlan\Documents\tareas tec\6°\LyA 2\Codigo analizador lexico\LyARev\LyARev\obj\Debug\LyARev.Form1.resources
+C:\Users\AriAlan\Documents\tareas tec\6°\LyA 2\Codigo analizador lexico\LyARev\LyARev\obj\Debug\LyARev.Properties.Resources.resources
+C:\Users\AriAlan\Documents\tareas tec\6°\LyA 2\Codigo analizador lexico\LyARev\LyARev\obj\Debug\LyARev.csproj.GenerateResource.Cache
+C:\Users\AriAlan\Documents\tareas tec\6°\LyA 2\Programini Completini ini\LyARev\LyARev\bin\Debug\LyARev.exe.config
+C:\Users\AriAlan\Documents\tareas tec\6°\LyA 2\Programini Completini ini\LyARev\LyARev\obj\Debug\LyARev.exe
+C:\Users\AriAlan\Documents\tareas tec\6°\LyA 2\Programini Completini ini\LyARev\LyARev\obj\Debug\LyARev.pdb
+C:\Users\AriAlan\Documents\tareas tec\6°\LyA 2\Programini Completini ini\LyARev\LyARev\bin\Debug\LyARev.exe
+C:\Users\AriAlan\Documents\tareas tec\6°\LyA 2\Programini Completini ini\LyARev\LyARev\bin\Debug\LyARev.pdb
+C:\Users\AriAlan\Documents\tareas tec\6°\LyA 2\Programini Completini ini\LyARev\LyARev\obj\Debug\LyARev.csprojResolveAssemblyReference.cache
+C:\Users\AriAlan\Documents\tareas tec\6°\LyA 2\Programini Completini ini\LyARev\LyARev\obj\Debug\LyARev.Form1.resources
+C:\Users\AriAlan\Documents\tareas tec\6°\LyA 2\Programini Completini ini\LyARev\LyARev\obj\Debug\LyARev.Properties.Resources.resources
+C:\Users\AriAlan\Documents\tareas tec\6°\LyA 2\Programini Completini ini\LyARev\LyARev\obj\Debug\LyARev.csproj.GenerateResource.Cache
+C:\Users\AriAlan\Documents\tareas tec\6°\LyA 2\Programini Completini ini\LyARev\LyARev\obj\Debug\LyARev.Frmtripleta.resources
